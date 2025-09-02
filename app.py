@@ -3,13 +3,10 @@ import pandas as pd
 import numpy as np
 import joblib
 import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
-
-
-# Load model and label encoder
+# ------------------------ LOAD MODEL & DATA ------------------------
 model = joblib.load("electricity_model.pkl")
 label_encoder = joblib.load("label_encoder.pkl")
 
@@ -17,15 +14,15 @@ label_encoder = joblib.load("label_encoder.pkl")
 df = pd.read_csv("cost.csv")
 df["structure type"] = label_encoder.inverse_transform(label_encoder.transform(df["structure type"]))
 
-# Set Streamlit page configuration
+# Streamlit Page Config
 st.set_page_config(page_title="Electricity Cost Dashboard", layout="wide")
 st.title("⚡ Electricity Cost Prediction Dashboard")
 st.markdown("An **interactive machine learning dashboard** for predicting monthly electricity costs.")
 
-# Sidebar navigation
+# Sidebar Navigation (Removed "Data Insights")
 menu = st.sidebar.radio(
     "📌 Select Page",
-    ["Prediction", "Data Insights", "Bulk Prediction", "Model Performance"]
+    ["Prediction", "Bulk Prediction", "Model Performance"]
 )
 
 # ------------------------ PAGE 1: SINGLE PREDICTION ------------------------
@@ -52,29 +49,7 @@ if menu == "Prediction":
         prediction = model.predict(input_data)
         st.success(f"💡 Predicted Monthly Electricity Cost: **${prediction[0]:,.2f}**")
 
-# ------------------------ PAGE 2: DATA INSIGHTS ------------------------
-elif menu == "Data Insights":
-    st.header("📊 Data Insights & Visualizations")
-
-    st.subheader("Dataset Overview")
-    st.dataframe(df.head())
-
-    st.subheader("Summary Statistics")
-    st.dataframe(df.describe())
-
-    # Correlation Heatmap
-    st.subheader("Correlation Heatmap")
-    plt.figure(figsize=(10, 5))
-    sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
-    st.pyplot(plt)
-
-    # Feature vs Target Visualization
-    st.subheader("Feature Impact on Electricity Cost")
-    feature = st.selectbox("Select a Feature", df.drop(columns=["electricity cost"]).columns)
-    fig = px.scatter(df, x=feature, y="electricity cost", color="structure type", trendline="ols")
-    st.plotly_chart(fig)
-
-# ------------------------ PAGE 3: BULK PREDICTION ------------------------
+# ------------------------ PAGE 2: BULK PREDICTION ------------------------
 elif menu == "Bulk Prediction":
     st.header("📂 Upload CSV for Bulk Predictions")
     uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
@@ -97,7 +72,7 @@ elif menu == "Bulk Prediction":
         csv = input_df.to_csv(index=False).encode("utf-8")
         st.download_button("📥 Download Predictions", csv, "bulk_predictions.csv", "text/csv")
 
-# ------------------------ PAGE 4: MODEL PERFORMANCE ------------------------
+# ------------------------ PAGE 3: MODEL PERFORMANCE ------------------------
 elif menu == "Model Performance":
     st.header("📈 Model Performance Metrics")
 
